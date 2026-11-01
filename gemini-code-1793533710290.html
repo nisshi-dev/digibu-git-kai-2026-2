@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>デジ部 Tech News | 高校生向け技術トレンド</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            letter-spacing: 0.05em;
+        }
+
+        header p {
+            margin-top: 0.5rem;
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        nav button {
+            background: none;
+            border: 2px solid transparent;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        nav button:hover {
+            color: var(--primary);
+            background-color: #eff6ff;
+        }
+
+        nav button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* 記事カードのデザイン */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            margin: 0 0 1rem 0;
+            line-height: 1.4;
+            color: var(--primary);
+            /* 長すぎるタイトルは省略 */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            background: #f1f5f9;
+            color: var(--text-muted);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        .meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1rem;
+            margin-top: auto;
+        }
+
+        .meta-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        .loader, .error {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>デジ部 Tech News 🚀</h1>
+        <p>高校生のための最新技術トレンド・ニュースまとめ</p>
+    </header>
+
+    <nav>
+        <button onclick="fetchNews('stocks:>50', this)" class="active">🔥 総合トレンド</button>
+        <button onclick="fetchNews('tag:AI OR tag:ChatGPT stocks:>10', this)">🤖 AI・ChatGPT</button>
+        <button onclick="fetchNews('tag:Web stocks:>10', this)">🌐 Web開発</button>
+        <button onclick="fetchNews('tag:Python OR tag:初心者 stocks:>10', this)">🔰 プログラミング入門</button>
+        <button onclick="fetchNews('tag:ゲーム制作 OR tag:Unity stocks:>5', this)">🎮 ゲーム制作</button>
+    </nav>
+
+    <main id="news-container">
+        <!-- 記事がここに動的に生成されます -->
+    </main>
+
+    <footer>
+        <p>&copy; 2026 デジ部. Data powered by Qiita API.</p>
+    </footer>
+
+    <script>
+        const container = document.getElementById('news-container');
+
+        // Qiita APIから記事を取得する関数
+        async function fetchNews(query, buttonElement) {
+            // タブの見た目を更新
+            if (buttonElement) {
+                document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+                buttonElement.classList.add('active');
+            }
+
+            container.innerHTML = '<div class="loader">記事を取得中...⏳</div>';
+
+            try {
+                // 1ページあたり12件、指定したクエリ(タグや「いいね」数)で検索
+                const url = `https://qiita.com/api/v2/items?page=1&per_page=12&query=${encodeURIComponent(query)}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error('データの取得に失敗しました。APIの制限に達した可能性があります。');
+                }
+
+                const articles = await response.json();
+                renderArticles(articles);
+            } catch (error) {
+                container.innerHTML = `<div class="error">⚠️ エラーが発生しました<br>${error.message}</div>`;
+            }
+        }
+
+        // 取得した記事をHTMLに変換して表示する関数
+        function renderArticles(articles) {
+            if (articles.length === 0) {
+                container.innerHTML = '<div class="loader">該当する記事が見つかりませんでした。</div>';
+                return;
+            }
+
+            const html = articles.map(article => {
+                // 日付をフォーマット
+                const date = new Date(article.created_at).toLocaleDateString('ja-JP');
+                // タグをHTMLに変換 (最大4つまで表示)
+                const tags = article.tags.slice(0, 4).map(t => `<span class="tag">${t.name}</span>`).join('');
+                
+                return `
+                    <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="card">
+                        <div>
+                            <h3>${article.title}</h3>
+                            <div class="tags">${tags}</div>
+                        </div>
+                        <div class="meta">
+                            <div class="meta-left">
+                                <img src="${article.user.profile_image_url}" alt="${article.user.id}" class="avatar">
+                                <span>${article.user.id}</span>
+                            </div>
+                            <div>
+                                <span>❤️ ${article.likes_count}</span>
+                                <span style="margin-left:8px;">📅 ${date}</span>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        // ページ読み込み時に最初のカテゴリ(総合トレンド)を取得
+        window.onload = () => {
+            fetchNews('stocks:>50', document.querySelector('nav button'));
+        };
+    </script>
+</body>
+</html>
